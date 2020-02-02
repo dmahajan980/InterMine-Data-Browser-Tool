@@ -13,7 +13,7 @@ var exec = require('child_process').exec;
 /**
  * Gulp task to copy third party libraries from /node_modules into /vendor
  */
-gulp.task('vendor', function() {
+gulp.task('vendor', function(done) {
   // Bootstrap
   gulp.src([
       './node_modules/bootstrap/dist/**/*',
@@ -51,13 +51,16 @@ gulp.task('vendor', function() {
       './node_modules/imjs/dist/*',
     ])
     .pipe(gulp.dest('./public/vendor/imjs'))
+
+  // Signals completion of the task
+  done();
 });
 
 /**
  * Gulp task to move the images in the src folder to the public folder
  */
 gulp.task('images', function() {
-  gulp.src([
+  return gulp.src([
       './src/img/*'
     ])
     .pipe(gulp.dest('./public/img/'))
@@ -67,7 +70,7 @@ gulp.task('images', function() {
  * Gulp task to move the JSON mine configs in the src folder to the public folder
  */
 gulp.task('mine_configs', function() {
-  gulp.src([
+  return gulp.src([
       './src/mine_configs/*'
     ])
     .pipe(gulp.dest('./public/mine_configs/'))
@@ -87,7 +90,7 @@ gulp.task('css:compile', function() {
 /**
  * Gulp task to minify CSS
  */
-gulp.task('css:minify', ['css:compile'], function() {
+gulp.task('css:minify', function() {
   return gulp.src([
       './src/css/*.css',
       '!./src/css/*.min.css'
@@ -103,7 +106,7 @@ gulp.task('css:minify', ['css:compile'], function() {
 /**
  * Gulp task for CSS
  */
-gulp.task('css', ['css:compile', 'css:minify']);
+gulp.task('css', gulp.series('css:compile', 'css:minify'));
 
 /**
  * Gulp task to minify JavaScript
@@ -124,7 +127,7 @@ gulp.task('js:minify', function() {
 /**
  * Gulp task for JS
  */
-gulp.task('js', ['js:minify']);
+gulp.task('js', gulp.series('js:minify'));
 
 /**
  * Gulp task for launching the documentation on src/ files and save it as HTML in the docs folder
@@ -137,4 +140,4 @@ gulp.task('documentation', function (cb) {
 /**
  * Gulp default task: CSS + JS + Vendor + images
  */
-gulp.task('default', ['css', 'js', 'vendor', 'images', 'mine_configs']);
+gulp.task('default', gulp.parallel('css', 'js', 'vendor', 'images', 'mine_configs'));
